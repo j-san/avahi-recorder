@@ -1,4 +1,6 @@
 
+[![Build Status](https://travis-ci.org/j-san/avahi-recorder.svg)](https://travis-ci.org/j-san/avahi-recorder)
+
 Avahi Recorder
 ==============
 
@@ -38,12 +40,13 @@ TODOs
   - `service-type`
   - `--permanent`
 
-If you want some todos done, just [tweet me](https://twitter.com/j_sanp)
+If you want some todos done, just [tweet me](https://twitter.com/j_sanp) :)
 
 Licence
 -------
 
-"THE BEER-WARE LICENSE" (Revision 42):
+**THE BEER-WARE LICENSE** (Revision 42):
+
 Jonathan Sanchez wrote this software. As long as you retain this notice you
 can do whatever you want with this stuff. If we meet some day, and you think
 this stuff is worth it, you can buy me a beer in return.
