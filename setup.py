@@ -13,7 +13,7 @@ setup(
     author_email='me@jsan.me',
     url='https://github.com/j-san/avahi-recorder',
     license='Beer-Ware',
-    install_requires=('dnslib',),
+    install_requires=('dnslib', 'dbus', ),
     extras_require={
         'dev': ('flake8',)
     },

@@ -7,7 +7,6 @@
 # this stuff is worth it, you can buy me a beer in return.
 # ----------------------------------------------------------------------------
 
-import avahi
 import dbus
 import time
 import sys
@@ -15,8 +14,20 @@ import gobject
 import dnslib
 from dbus.mainloop.glib import DBusGMainLoop
 
-PARENT_DOMAIN = '.subzone.lan'
+PARENT_DOMAIN = '.subnet.lan'
 ZONE_FILE = '/etc/named/avahi-discover'
+
+AVAHI_DBUS_NAME = 'org.freedesktop.Avahi'
+AVAHI_DBUS_PATH_SERVER = '/'
+
+AVAHI_DBUS_INTERFACE_SERVER = 'org.freedesktop.Avahi.Server'
+AVAHI_DBUS_INTERFACE_SERVICE_TYPE_BROWSER = (
+    'org.freedesktop.Avahi.ServiceTypeBrowser')
+AVAHI_DBUS_INTERFACE_SERVICE_BROWSER = (
+    'org.freedesktop.Avahi.ServiceBrowser')
+
+AVAHI_PROTO_UNSPEC = -1
+AVAHI_IF_UNSPEC = -1
 
 
 class AvahiBrowser:
@@ -27,8 +38,8 @@ class AvahiBrowser:
     def connect(self):
         self.bus = dbus.SystemBus()
         self.server = dbus.Interface(
-            self.bus.get_object(avahi.DBUS_NAME, avahi.DBUS_PATH_SERVER),
-            avahi.DBUS_INTERFACE_SERVER
+            self.bus.get_object(AVAHI_DBUS_NAME, AVAHI_DBUS_PATH_SERVER),
+            AVAHI_DBUS_INTERFACE_SERVER
         )
 
     def new_service(self, interface, protocol, name, stype, domain, flags):
@@ -39,7 +50,7 @@ class AvahiBrowser:
             name,
             stype,
             domain,
-            avahi.PROTO_UNSPEC,
+            AVAHI_PROTO_UNSPEC,
             dbus.UInt32(0),
             reply_handler=self.service_resolved,
             error_handler=self.print_error
@@ -55,8 +66,8 @@ class AvahiBrowser:
         print(err)
 
     def browse_domain(self, domain, stype=None):
-        interface = avahi.IF_UNSPEC
-        protocol = avahi.PROTO_UNSPEC
+        interface = AVAHI_IF_UNSPEC
+        protocol = AVAHI_PROTO_UNSPEC
         flags = dbus.UInt32(0)
 
         # Are we already browsing this domain?
@@ -67,7 +78,7 @@ class AvahiBrowser:
 
                 b = dbus.Interface(
                     self.bus.get_object(
-                        avahi.DBUS_NAME,
+                        AVAHI_DBUS_NAME,
                         self.server.ServiceTypeBrowserNew(
                             interface,
                             protocol,
@@ -75,7 +86,7 @@ class AvahiBrowser:
                             flags
                         )
                     ),
-                    avahi.DBUS_INTERFACE_SERVICE_TYPE_BROWSER
+                    AVAHI_DBUS_INTERFACE_SERVICE_TYPE_BROWSER
                 )
                 self.service_type_browsers[(interface, protocol, domain)] = b
 
@@ -91,7 +102,7 @@ class AvahiBrowser:
 
             b = dbus.Interface(
                 self.bus.get_object(
-                    avahi.DBUS_NAME,
+                    AVAHI_DBUS_NAME,
                     self.server.ServiceBrowserNew(
                         interface,
                         protocol,
@@ -100,7 +111,7 @@ class AvahiBrowser:
                         dbus.UInt32(0)
                     )
                 ),
-                avahi.DBUS_INTERFACE_SERVICE_BROWSER
+                AVAHI_DBUS_INTERFACE_SERVICE_BROWSER
             )
             b.connect_to_signal('ItemNew', self.new_service)
 
@@ -123,8 +134,8 @@ class AvahiBrowser:
                 )
             )
 
-        print("-" * 20)
-        print(dns)
+        # print("-" * 20)
+        # print(dns)
         f = open(ZONE_FILE, 'w')
         f.write(str(dns))
         f.close()
