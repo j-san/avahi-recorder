@@ -12,6 +12,7 @@ import time
 import sys
 import gobject
 import dnslib
+from dnslib.server import DNSServer, DNSLogger
 from dbus.mainloop.glib import DBusGMainLoop
 
 PARENT_DOMAIN = '.subnet.lan'
@@ -43,7 +44,8 @@ class AvahiBrowser:
         )
 
     def new_service(self, interface, protocol, name, stype, domain, flags):
-        print(str(domain), str(name), str(stype))
+        print(u'service found {} {} {}'.format(
+            unicode(domain), unicode(name), unicode(stype)))
         self.server.ResolveService(
             interface,
             protocol,
@@ -59,8 +61,8 @@ class AvahiBrowser:
     def service_resolved(
             self, interface, protocol, name, stype,
             domain, host, aprotocol, address, port, txt, flags):
-        self.dicovered[str(host)] = str(address)
-        self.write_dns()
+        self.dicovered[unicode(host)] = unicode(address)
+        # self.write_dns()
 
     def print_error(self, err):
         print(err)
@@ -134,22 +136,47 @@ class AvahiBrowser:
                 )
             )
 
-        # print("-" * 20)
-        # print(dns)
         f = open(ZONE_FILE, 'w')
         f.write(str(dns))
         f.close()
+
+    def resolve(self, request, handler):
+        print('resolve')
+        reply = request.reply()
+        # dnslib.RR(
+        #     domain.replace(
+        #         '.local',
+        #         PARENT_DOMAIN
+        #     ),
+        #     rdata=dnslib.A(address)
+        # )
+        reply.add_answer(dnslib.RR(
+            'hello.subnet.lan',
+            rdata=dnslib.A('192.168.0.0')
+        ))
+        return reply
 
 
 if __name__ == '__main__':
     DBusGMainLoop(set_as_default=True)
 
     try:
-        browser = AvahiBrowser()
-        browser.connect()
+        resolver = AvahiBrowser()
+
+        logger = DNSLogger(prefix=False)
+        server = DNSServer(
+            resolver,
+            port=8053,
+            address='0.0.0.0',
+            # tcp=True,
+            logger=logger)
+
+        resolver.connect()
 
         # scanner.browse_domain("local", "_ssh._tcp")
-        browser.browse_domain("local")
+        resolver.browse_domain('local')
+        server.start_thread()
+        # server.start()
 
     except dbus.DBusException as e:
         print("Failed to connect to Avahi, is it running?: {}".format(e))

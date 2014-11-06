@@ -12,8 +12,9 @@ Install
 -------
 
 ```
-sudo pip2.7 install avahi-recorder
-sudo avahi-recorder.py
+sudo pip install avahi-recorder
+sudo yum install python-dbus
+avahi-recorder.py
 # It will create  a DNS zone file in /etc/named/avahi-discover
 # yum install bind dnsutils
 # configure your dsn server
@@ -24,7 +25,8 @@ Develop
 -------
 
 ```
-virtualenv -p python2 env
+# use sys packages for dbus
+virtualenv env -p python2 --system-site-packages
 env/bin/pip install -e .[dev]
 env/bin/flake8 *.py
 env/bin/avahi-recorder.py
